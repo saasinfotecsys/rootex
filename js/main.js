@@ -235,17 +235,57 @@ function initBookingEngine() {
  * 5. Smooth Scroll navigation & close mobile navbar on click
  */
 function initSmoothScroll() {
-  const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+  const allNavAnchors = document.querySelectorAll('.navbar-nav a, .navbar-brand');
   const navbarCollapse = document.getElementById('navbarRootexNav');
 
-  navLinks.forEach(link => {
+  function closeMobileNav() {
+    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+      const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+      if (bsCollapse) {
+        bsCollapse.hide();
+      }
+    }
+  }
+
+  allNavAnchors.forEach(link => {
     link.addEventListener('click', () => {
-      if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-        if (bsCollapse) {
-          bsCollapse.hide();
-        }
+      closeMobileNav();
+    });
+  });
+
+  // Close mobile navbar when tapping outside of it
+  document.addEventListener('click', (e) => {
+    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+      const navEl = document.querySelector('.navbar-rootex');
+      if (navEl && !navEl.contains(e.target)) {
+        closeMobileNav();
+      }
+    }
+  });
+
+  // Active link highlighter on scroll
+  const sections = document.querySelectorAll('header[id], section[id]');
+  const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+  window.addEventListener('scroll', () => {
+    let currentId = '';
+    const scrollPos = window.scrollY + 120;
+
+    sections.forEach(sec => {
+      const top = sec.offsetTop;
+      const height = sec.offsetHeight;
+      if (scrollPos >= top && scrollPos < top + height) {
+        currentId = sec.getAttribute('id');
       }
     });
+
+    if (currentId) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentId}`) {
+          link.classList.add('active');
+        }
+      });
+    }
   });
 }
